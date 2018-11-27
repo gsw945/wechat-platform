@@ -22,6 +22,25 @@ def get_site_version(root):
             f.write(v)
     return v
 
+def init_admin(app):
+    '''初始化管理员用户'''
+    with app.test_request_context():
+        from backend.apps.auth.models import User, Role, Permission
+
+        db = app.db
+        default_email = 'admin@gsw945.com'
+        if User.query.filter_by(email=default_email).count() < 1:
+            password = User.encrypt_string('administrator')
+            user_obj = User(email=default_email, password=password)
+            user_obj.nickname= '玖亖伍'
+            db.session.add(user_obj)
+            db.session.commit()
+            print('添加初始数据成功')
+        else:
+            user_obj = User.query.first().to_dict()
+        if isinstance(user_obj, User):
+            print(user_obj)
+
 def start_server(run_cfg=None, is_deploy=False):
     '''启动web服务器'''
     if not bool(run_cfg):
@@ -45,6 +64,7 @@ def start_server(run_cfg=None, is_deploy=False):
     def init_user(*args, **kwargs):
         print(args)
         print(kwargs)
+        init_admin(app)
 
     if 'host' in run_cfg and 'port' in run_cfg:
         print_host = run_cfg['host']

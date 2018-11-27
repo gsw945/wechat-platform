@@ -8,6 +8,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from flask_sqlalchemy import BaseQuery
 
 from .helper import classproperty
+from ...utils.functions import md5
 
 
 # Base = declarative_base()
@@ -63,6 +64,29 @@ class User(Base):
 
     def __repr__(self):
         return '<{0} {1!r}>'.format(__class__.__name__, self.email)
+
+    @classmethod
+    def encrypt_string(cls, raw_str, mix=''):
+        '''加密算法(需要保密)'''
+        ret = md5(raw_str)
+        ret = md5(ret[::2]) + md5(ret[::3])
+        ret = md5(ret) + md5(ret[::5])
+        ret = ret[3:-3][5:] + mix
+        ret = md5(ret)
+        return ret
+
+    @classmethod
+    def verify_encrypt(cls, raw_str, encrypted_str, mix=''):
+        '''
+        验证明文和密文是否对应
+
+        :param raw_str: 明文
+        :param encrypted_str: 密文
+        :param_str raw_str: str
+        :param_str encrypted_str: str
+        :return_type: bool
+        '''
+        return cls.encrypt_string(raw_str, mix=mix) == encrypted_str
 
 class Role(Base):
     """角色"""

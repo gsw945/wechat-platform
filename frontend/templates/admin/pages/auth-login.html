@@ -5,9 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Main CSS-->
-    <link rel="stylesheet" type="text/css" href="/static/apps/admin/css/main.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='apps/admin/css/main.css') }}">
     <!-- Font-icon css-->
-    <link rel="stylesheet" type="text/css" href="/static/_libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='_libs/font-awesome/css/font-awesome.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='_libs/animate/animate.css') }}">
     <title>微信订阅号运营平台</title>
   </head>
   <body>
@@ -23,11 +24,11 @@
           <h3 class="login-head"><i class="fa fa-lg fa-fw fa-user"></i>登 录</h3>
           <div class="form-group">
             <label class="control-label">账号</label>
-            <input class="form-control" type="text" placeholder="邮箱" autofocus>
+            <input name="email" class="form-control" type="text" placeholder="邮箱" autofocus>
           </div>
           <div class="form-group">
             <label class="control-label">密码</label>
-            <input class="form-control" type="password" placeholder="密码">
+            <input name="password" class="form-control" type="password" placeholder="密码">
           </div>
           <div class="form-group">
             <div class="utility">
@@ -65,11 +66,42 @@
     <script src="/static/apps/admin/js/main.js"></script>
     <!-- The javascript plugin to display page loading on top-->
     <script src="/static/apps/admin/js/plugins/pace.min.js"></script>
+    <script src="{{ url_for('static', filename='_libs/sweetalert/sweetalert.min.js') }}"></script>
     <script type="text/javascript">
+      if(!window.GLOBAL) {
+        window.GLOBAL = {};
+      }
+      window.GLOBAL.LOGIN_URL = "{{ url_for('auth.view_login') }}";
       // Login Page Flipbox control
       $('.login-content [data-toggle="flip"]').click(function() {
         $('.login-box').toggleClass('flipped');
         return false;
+      });
+      $('.login-form .btn-container button.btn-primary').click(function() {
+        var email = $('input[name="email"]').val().trim(),
+          password = $('input[name="password"]').val().trim();
+        $.ajax({
+          url: GLOBAL.LOGIN_URL,
+          type: 'POST',
+          data: {
+            'email': email,
+            'password': password
+          },
+          dataType: 'json',
+          success: function(resp) {
+            if(resp.error == 0) {
+              swal("温馨提示", resp.desc,"success", {timer: 1500}).then(function() {
+                window.location.href = resp.url;
+              });
+            }
+            else {
+                swal("温馨提示", resp.desc,"warning");
+            }
+          },
+          error: function(xhr) {
+            console.log(xhr);
+          }
+        });
       });
     </script>
   </body>
