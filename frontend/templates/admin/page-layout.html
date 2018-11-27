@@ -8,11 +8,83 @@
     <link rel="shortcut icon" type="image/png" href="{{ url_for('favicon_robots', _file='favicon.png') }}" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Main CSS-->
-    <link rel="stylesheet" type="text/css" href="/static/apps/admin/css/main.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='apps/admin/css/bootstrap-glyphicon.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='apps/admin/css/main.css') }}">
     <!-- Font-icon css-->
-    <link rel="stylesheet" type="text/css" href="/static/_libs/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/static/apps/admin/css/pages-layout.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='_libs/font-awesome/css/font-awesome.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='apps/admin/css/pages-layout.css') }}">
     {% block head_css %}
+    <style type="text/css">
+      .bootstrap-table .dropdown-toggle::after {
+        border: 0 none;
+      }
+      /* bootbox */
+      .modal-header {
+        padding-bottom: 1.3em;
+        border-bottom: 1px solid #e5e5e5;
+      }
+      .modal-header h4 {
+        position: absolute;
+      }
+
+      .modal-body {
+        padding: 6px 10px 10px 12px;
+      }
+      .bootbox-body {
+        text-align: left;
+      }
+
+      .modal-footer {
+        padding-top: 5px;
+      }
+      .modal-footer button {
+        border-width: 1px;
+      }
+
+      .line-block-wrapper .line-block-content {
+        position: relative;
+        top: -2em;
+        left: 2.6em;
+        margin-right: 2.6em;
+      }
+      .line-block-wrapper .line-block-content .content-item {
+        border: 1px solid #e4dfd6;
+        display: inline-block;
+        border-radius: 3px;
+        padding: 0 3px;
+        margin-top: 3px;
+        margin-bottom: -2em;
+      }
+
+      .line-block-wrapper .line-block-content .content-item + .content-item {
+         margin-left: 5px;
+      }
+
+      .line-tip {
+        width: 4em;
+        text-align: right;
+      }
+
+      .popup-tip-msg {
+        position: absolute;
+        right: 0.7em;
+        top: 0.5em;
+        color: #f00;
+      }
+      @media (max-width: 560px) {
+        .popup-tip-msg {
+          max-width: 10em;
+        }
+      }
+      @media (max-width: 444px) {
+        .box-form-wrapper {
+          padding-top: 2em;
+        }
+        .popup-tip-msg {
+          max-width: 100%;
+        }
+      }
+    </style>
     {% endblock %}
   </head>
   {% if request.cookies.get('sidenav-toggled') == 'true' %}
@@ -35,15 +107,15 @@
       {% endblock %}
     </main>
     <!-- Essential javascripts for application to work-->
-    <script src="/static/_libs/js-cookie/2.2.0/js.cookie.min.js"></script>
+    <script src="{{ url_for('static', filename='_libs/js-cookie/2.2.0/js.cookie.min.js') }}"></script>
     <script src="{{ static_url('_utils/loader.js') }}"></script>
-    <script src="/static/apps/admin/js/jquery-3.2.1.min.js"></script>
-    <script src="/static/apps/admin/js/popper.min.js"></script>
-    <script src="/static/apps/admin/js/bootstrap.min.js"></script>
-    <script src="/static/_libs/bootbox/bootbox.min.js"></script>
-    <script src="/static/apps/admin/js/main.js"></script>
+    <script src="{{ url_for('static', filename='apps/admin/js/jquery-3.2.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='apps/admin/js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='apps/admin/js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='_libs/bootbox/bootbox.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='apps/admin/js/main.js') }}"></script>
     <!-- The javascript plugin to display page loading on top-->
-    <script src="/static/apps/admin/js/plugins/pace.min.js"></script>
+    <script src="{{ url_for('static', filename='apps/admin/js/plugins/pace.min.js') }}"></script>
     <!-- Page specific javascripts-->
     {% block body_js %}
     <script type="text/javascript">
@@ -57,6 +129,22 @@
       window.GLOBAL.PAGE_ID = "{{ request.endpoint }}"; // 模板变量
 
       var DRAGGABILLY_SRC = "{{ static_url('draggabilly') }}";
+
+      function build_line(item_name, item_html, tip_style) {
+        if(!tip_style) {
+          tip_style = '';
+        }
+        tip_style += 'display: inline-block;';
+        return [
+          '<div class="form-line">',
+            '<span style="', tip_style, '">',
+              '<label class="line-tip">', item_name, '</label>: ',
+            '</span>',
+            item_html,
+          '</div>'
+        ].join('');
+      }
+
       $(document).ready(function() {
         // 配置调试工具
         var $fl_dth = $('#flDebugToolbarHandle');

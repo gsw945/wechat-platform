@@ -45,7 +45,7 @@ function get_selected_ids() {
     var selection = $tb_obj.bootstrapTable('getSelections');
     var ids = [];
     for (var i = 0; i < selection.length; i++) {
-        ids.push(selection[i].id);
+        ids.push(selection[i].uid);
     }
     return ids;
 }
@@ -86,18 +86,6 @@ function change_enable($tb_obj) {
     }
 }
 
-function build_is_admin(is_admin_val) {
-    return [
-        '<label>',
-            '<input type="radio" name="rdo-is-admin" value="1" ', (is_admin_val == '1' ? 'checked="checked"' : ''), ' />是',
-        '</label>',
-        '&nbsp;&nbsp;',
-        '<label>',
-            '<input type="radio" name="rdo-is-admin" value="0" ', (is_admin_val == '0' ? 'checked="checked"' : ''), ' />否',
-        '</label>',
-    ].join('');
-}
-
 function build_is_disable(is_disable_val) {
     return [
         '<label>',
@@ -121,7 +109,6 @@ function popup_user(box_title, user_item) {
         is_new = true;
         user_item = {
             name: '',
-            is_admin: 0,
             email: '',
             advertising: '',
             is_hot: 0,
@@ -138,12 +125,12 @@ function popup_user(box_title, user_item) {
     if(!is_new) {
         htmls.push(build_line(
             'ID',
-            '<span>' + user_item.id + '</span>'
+            '<span>' + user_item.uid + '</span>'
         ));
     }
     htmls.push(build_line(
-        '姓名',
-        '<input type="text" name="txt-name" value="' + user_item.name + '" placeholder="姓名" />'
+        '昵称',
+        '<input type="text" name="txt-name" value="' + user_item.nickname + '" placeholder="昵称" />'
     ));
     htmls.push(build_line(
         '邮箱',
@@ -152,10 +139,6 @@ function popup_user(box_title, user_item) {
     htmls.push(build_line(
         '密码',
         '<input type="text" name="txt-password" value="" placeholder="' + (is_new ? '密码' : '不修改请留空') + '" />'
-    ));
-    htmls.push(build_line(
-        '管理员',
-        build_is_admin(user_item.is_admin)
     ));
     if(!is_new) {
         htmls.push(build_line(
@@ -213,7 +196,7 @@ function get_user_by_id(d_id) {
     var ret = null;
     var dl = $('#tb-users').data('bootstrap.table').data;
     for (var i = 0; i < dl.length; i++) {
-        if(dl[i].id == d_id) {
+        if(dl[i].uid == d_id) {
             ret = dl[i];
             break;
         }
@@ -258,24 +241,22 @@ function collect_submit_info($dialog, user_item) {
     var $form = $dialog.find('.bootbox-body .box-form-wrapper');
     var is_new = true;
     var _ret = {};
-    if(!!user_item.id) {
+    if(!!user_item.uid) {
         is_new = false;
-        _ret['id'] = user_item.id;
+        _ret['uid'] = user_item.uid;
     }
     var _name = $form.find('input[name="txt-name"]').val();
     if(!_name || _name.length < 1) {
-        alert('[姓名]必填');
+        alert('[昵称]必填');
         return null;
     }
-    _ret['name'] = _name;
+    _ret['nickname'] = _name;
     var _email = $form.find('input[name="txt-email"]').val();
     if(!_email || _email.length < 1) {
         alert('[邮箱]必填');
         return null;
     }
     _ret['email'] = _email;
-    var _is_admin = $form.find('input[name="rdo-is-admin"]:checked').val();
-    _ret['is_admin'] = _is_admin;
     if(!is_new) {
         var _disable = $form.find('input[name="rdo-is-disable"]:checked').val();
         _ret['disable'] = _disable;

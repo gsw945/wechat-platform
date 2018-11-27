@@ -103,6 +103,11 @@
           }
         });
       });
+      $('.login-form').keypress(function(event) {
+        if(event.keyCode == 13) {
+          $('.login-form .btn-container button.btn-primary').trigger('click');
+        }
+      })
     </script>
   </body>
 </html>

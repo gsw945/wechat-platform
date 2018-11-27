@@ -2,7 +2,7 @@
 from datetime import datetime
 
 import pytz
-from sqlalchemy import Table, Column, Integer, String, DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import Table, Column, Integer, String, DateTime, Boolean, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import backref, relationship
 from sqlalchemy.ext.declarative import declarative_base
 from flask_sqlalchemy import BaseQuery
@@ -43,6 +43,8 @@ class User(Base):
         default=datetime.now(tz=pytz.timezone('Asia/Shanghai')),
         comment='注册时间'
     )
+    disable = Column("disable", Boolean(create_constraint=False), default=False) # 是否禁用
+    deleted = Column("deleted", Boolean(create_constraint=False), default=False) # 是否标记为删除
 
     roles = relationship('Role',
         secondary=user_role_map,
