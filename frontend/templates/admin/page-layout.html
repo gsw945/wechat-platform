@@ -4,7 +4,8 @@
     <meta name="description" content="微信订阅号运营平台">
     <title>微信订阅号运营平台</title>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <link rel="shortcut icon" type="image/png" href="{{ url_for('favicon_robots', _file='favicon.png') }}" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Main CSS-->
     <link rel="stylesheet" type="text/css" href="/static/apps/admin/css/main.css">
@@ -35,6 +36,7 @@
     </main>
     <!-- Essential javascripts for application to work-->
     <script src="/static/_libs/js-cookie/2.2.0/js.cookie.min.js"></script>
+    <script src="{{ static_url('_utils/loader.js') }}"></script>
     <script src="/static/apps/admin/js/jquery-3.2.1.min.js"></script>
     <script src="/static/apps/admin/js/popper.min.js"></script>
     <script src="/static/apps/admin/js/bootstrap.min.js"></script>
@@ -52,9 +54,30 @@
       window.GLOBAL.METHOD = "{{ request.method }}"; // from flask import request; request.method
       window.GLOBAL.DEBUG = "{{ config.DEBUG }}"; // app.config['DEBUG']
 
-      window.GLOBAL.PAGE_ID = "{{ page_id | default('') }}"; // 模板变量
+      window.GLOBAL.PAGE_ID = "{{ request.endpoint }}"; // 模板变量
 
+      var DRAGGABILLY_SRC = "{{ static_url('draggabilly') }}";
       $(document).ready(function() {
+        // 配置调试工具
+        var $fl_dth = $('#flDebugToolbarHandle');
+        if($fl_dth.length > 0) {
+          loadJS(DRAGGABILLY_SRC, function() {
+            var pos = $fl_dth.position();
+            $fl_dth.draggabilly({
+              containment: 'body'
+            });
+            $fl_dth.css('position', 'fixed');
+            $fl_dth.css({
+              'left': pos.left + 'px',
+              'top': pos.top + 'px',
+              'display': 'inline-block',
+              'width': '37px'
+            });
+            $fl_dth.find('#flShowToolBarButton').css('display', 'inline-block');
+            $('#flDebugToolbar').css('overflow', 'auto');
+          });
+        }
+
         var $sidebar = $('.app-sidebar .app-menu');
         var $li = $sidebar.find('li[data-page-id="' + GLOBAL.PAGE_ID + '"]');
         if($li.children('a.app-menu__item').length > 0) {

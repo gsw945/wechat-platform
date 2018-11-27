@@ -5,26 +5,27 @@ import pytz
 from sqlalchemy import Table, Column, Integer, String, DateTime, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import backref, relationship
 from sqlalchemy.ext.declarative import declarative_base
-from ...core.database import db
+from flask_sqlalchemy import BaseQuery
+
+from .helper import classproperty
 
 
 # Base = declarative_base()
+from ...core.database import db
 Base = db.Model
 
-# 用户-角色-关联
+# 用户-角色-关联(['user_id', 'role_id']唯一)
 user_role_map = Table('user_role_map', Base.metadata,
     Column('urid', Integer, primary_key=True, autoincrement=True, comment='主键ID'),
     Column('user_id', Integer, ForeignKey('users.uid'), nullable=False, comment='用户ID'),
-    Column('role_id', Integer, ForeignKey('roles.rid'), nullable=False, comment='角色ID'),
-    UniqueConstraint('user_id', 'role_id')
+    Column('role_id', Integer, ForeignKey('roles.rid'), nullable=False, comment='角色ID')
 )
 
-# 角色-权限-关联
+# 角色-权限-关联(['role_id', 'permission_id']唯一)
 role_permission_map = Table('role_permission_map', Base.metadata,
     Column('urid', Integer, primary_key=True, autoincrement=True, comment='主键ID'),
     Column('role_id', Integer, ForeignKey('roles.rid'), nullable=False, comment='角色ID'),
-    Column('permission_id', Integer, ForeignKey('permissions.pid'), nullable=False, comment='权限ID'),
-    UniqueConstraint('role_id', 'permission_id')
+    Column('permission_id', Integer, ForeignKey('permissions.pid'), nullable=False, comment='权限ID')
 )
 
 class User(Base):
@@ -53,6 +54,13 @@ class User(Base):
         self.password = password
         self.nickname = nickname
 
+    def to_dict(self):
+        return {
+            'uid': self.uid,
+            'email': self.email,
+            'nickname': self.nickname
+        }
+
     def __repr__(self):
         return '<{0} {1!r}>'.format(__class__.__name__, self.email)
 
@@ -78,24 +86,60 @@ class Role(Base):
 class Permission(Base):
     """权限"""
     __tablename__ = 'permissions'
-    __table_args__ = (
-        UniqueConstraint('name', 'endpoint'),
-    )
+    # (['category', 'record']唯一)(['category', 'name']暂不作唯一考虑)
+    __table_args__ = ()
     
     pid = Column('pid', Integer, primary_key=True, autoincrement=True, comment='权限ID')
-    name = Column('name', String(50), unique=True, nullable=False, comment='权限名')
-    endpoint = Column('endpoint', String(250), unique=True, nullable=False, comment='权限操作挂载的路由')
+    name = Column('name', String(128), nullable=False, comment='权限名')
+    record = Column('record', String(128), nullable=False, comment='权限记录标识')
+    category = Column('category', String(50), nullable=False, comment='权限分类(取值: route,menu)')
 
-    def __init__(self, endpoint, name):
-        self.endpoint = endpoint
+    @classproperty
+    def allowed_categories(cls):
+        return {
+            'route': '路由',
+            'menu': '菜单'
+        }
+
+    @property
+    def category_text(self):
+        return self.allowed_categories[self.category]
+
+    def __init__(self, name, record, category='route'):
         self.name = name
+        self.record = record
+        if category not in self.allowed_categories:
+            raise ValueError('category取值只能是[{0}]之一'.format('、'.join(
+                map(lambda item: repr(item), self.allowed_categories.keys())
+            )))
+        self.category = category
 
     def to_dict(self):
         return {
             'pid': self.pid,
             'name': self.name,
-            'endpoint': self.endpoint
+            'record': self.record,
+            'category': self.category
         }
 
     def __repr__(self):
-        return '<{0} {1!r}>'.format(__class__.__name__, self.name)
+        return '<{0} [{1}]-{2!r}>'.format(__class__.__name__, self.category_text, self.name)
+
+    @classmethod
+    def get_by(cls, pid=None, record=None, category=None):
+        '''
+        根据参数获取权限对象，2中情形:
+        1. 根据pid
+        2. category和record同时提供
+        '''
+        Q = None
+        if isinstance(pid, int):
+            Q = __class__.query.filter_by(pid=pid)
+        elif category in cls.allowed_categories and bool(record):
+            Q = __class__.query.filter_by(
+                category=category,
+                record=record
+            )
+        if isinstance(Q, BaseQuery):
+            if Q.count() > 0:
+                return Q.first()

@@ -24,9 +24,10 @@ from .core.middlewares import PrefixMiddleware
 from .core.template import with_template_filters
 from .utils import ensure_database, get_engine
 from .app_env import get_config
-from .apps.auth.main import record_permission, bind_app, Base, sync_permissions
+from .apps.auth.main import record_auth_route, register_auth_menus, register_auth_routes, Base, sync_permissions
 
 from .app_map import blueprints
+from .menus import sidebar
 
 
 def create_app(config):
@@ -104,9 +105,16 @@ def create_app(config):
     # 注册蓝图(子应用)
     for item in blueprints:
         app.register_blueprint(item[1], url_prefix=item[0])
+
+    # sidebar
+    @app.context_processor
+    def template_sidebar_menus():
+        return {'sidebar_menus': sidebar}
     
-    # 绑定auth
-    bind_app(app)
+    # 注册Auth路由
+    register_auth_routes(app)
+    # 注册Auth菜单
+    register_auth_menus(app, sidebar)
 
     # 仅仅用于开发阶段和部署第一次启动初始化时
     with app.test_request_context():

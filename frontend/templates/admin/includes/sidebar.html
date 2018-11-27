@@ -1,18 +1,51 @@
 <div class="app-sidebar__overlay" data-toggle="sidebar"></div>
 <aside class="app-sidebar">
-  <div class="app-sidebar__user">
-    <img class="app-sidebar__user-avatar" src="/static/apps/admin/img/avatar.jpg" alt="User Image">
-    <div>
-      <p class="app-sidebar__user-name">Admin</p>
-      <p class="app-sidebar__user-designation">超级管理员</p>
+    <div class="app-sidebar__user">
+        <img class="app-sidebar__user-avatar" src="/static/apps/admin/img/avatar.jpg" alt="User Image">
+        <div>
+            <p class="app-sidebar__user-name">Admin</p>
+            <p class="app-sidebar__user-designation">超级管理员</p>
+        </div>
     </div>
-  </div>
-  <ul class="app-menu">
-    <li data-page-id="view-index"><a class="app-menu__item" href="{{ url_for('admin.view_index') }}"><i class="app-menu__icon fa fa-dashboard"></i><span class="app-menu__label">概览</span></a></li>
-    <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="app-menu__icon fa fa-file-text"></i><span class="app-menu__label">测试</span><i class="treeview-indicator fa fa-angle-right"></i></a>
-      <ul class="treeview-menu">
-        <li data-page-id="view-test-blank"><a class="treeview-item" href="{{ url_for('admin.view_test_blank') }}"><i class="icon fa fa-circle-o"></i> 空白页</a></li>
-      </ul>
-    </li>
-  </ul>
+    <ul class="app-menu">
+    {% for top_item in sidebar_menus %}
+        {% if top_item['type'] in ['url4', 'href'] %}
+            {% set top_url = '' %}
+            {% if top_item['type'] == 'url4' %}
+                {% set top_url = url_for(top_item['value']) %}
+            {% elif top_item['type'] == 'href' %}
+                {% set top_url = top_item['value'] %}
+            {% endif %}
+            <li data-page-id="{{ top_item['value'] }}">
+                <a class="app-menu__item" href="{{ top_url }}">
+                    <i class="app-menu__icon {{ top_item['icon'] }}"></i>
+                    <span class="app-menu__label">{{ top_item['text'] }}</span>
+                </a>
+            </li>
+        {% elif top_item['type'] == 'group' %}
+            <li class="treeview">
+                <a class="app-menu__item" href="javascript:;" data-toggle="treeview">
+                    <i class="app-menu__icon {{ top_item['icon'] }}"></i>
+                    <span class="app-menu__label">{{ top_item['text'] }}</span>
+                    <i class="treeview-indicator fa fa-angle-right"></i>
+                </a>
+                <ul class="treeview-menu">
+                {% for sub_item in top_item['value'] %}
+                    {% set sub_url = '' %}
+                    {% if sub_item['type'] == 'url4' %}
+                        {% set sub_url = url_for(sub_item['value']) %}
+                    {% elif sub_item['type'] == 'href' %}
+                        {% set sub_url = sub_item['value'] %}
+                    {% endif %}
+                    <li data-page-id="{{ sub_item['value'] }}">
+                        <a class="treeview-item" href="{{ sub_url }}">
+                            <i class="icon {{ sub_item['icon'] }}"></i> {{ sub_item['text'] }}
+                        </a>
+                    </li>
+                {% endfor %}
+                </ul>
+            </li>
+        {% endif %}
+    {% endfor %}
+    </ul>
 </aside>

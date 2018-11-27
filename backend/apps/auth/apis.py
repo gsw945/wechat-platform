@@ -1,15 +1,35 @@
 # -*- coding: utf-8 -*-
-from flask import jsonify, g, request
+from flask import jsonify, g, request, session
 
 from . import auth_app
-from .models import Permission
-from .decorators import record_permission
+from .models import User, Role, Permission
+from .helper import record_auth_route
 
 
-@auth_app.route('/login')
-@record_permission('权限-登录')
+@auth_app.route('/login', methods=['GET', 'POST'])
+@record_auth_route('权限-登录')
 def view_login():
-    return jsonify({})
+    email = request.values.get('email')
+    password = request.values.get('password')
+    if bool(email) and bool(password):
+        Q = User.query.filter_by(email=email, password=password)
+        if Q.count() > 0:
+            session['logined_user'] = Q.first().to_dict()
+            ret = {
+                'error': 0,
+                'desc': '登录成功'
+            }
+        else:
+            ret = {
+                'error': 2,
+                'desc': '用户名或密码错误'
+            }
+    else:
+        ret = {
+            'error': 1,
+            'desc': '缺少参数'
+        }
+    return jsonify(ret)
 
 def ac_check():
     print('访问[{0}], 需要[{1}]权限'.format(request.endpoint, g.route_permission))
@@ -29,6 +49,6 @@ def ac_check():
     })
 
 @auth_app.route('/demo')
-@record_permission('权限-Demo', check_func=ac_check)
+@record_auth_route('权限-Demo', check_func=ac_check)
 def view_demo():
     return jsonify({})

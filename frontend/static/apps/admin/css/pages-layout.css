@@ -5,3 +5,75 @@
 .app-header .app-header__logo {
     font-size: 17px;
 }
+.treeview-item:hover {
+    color: #c5c5c5;
+}
+.treeview-item.active {
+    background-color: #2a4861;
+}
+.treeview-item:not(.active):hover,
+.treeview-item:focus {
+    background-color: #26363c;
+}
+
+/* bootbox */
+.modal-header {
+    padding: 5px 15px;
+    border-bottom: 1px solid #e5e5e5;
+}
+.modal-header h4 {
+    padding: 5px 0 0 4px;
+    text-align: left;
+}
+.modal-body {
+    padding: 6px 10px 10px 12px;
+}
+.bootbox-body {
+    text-align: left;
+}
+.modal-footer {
+    padding-top: 5px;
+}
+.modal-footer button {
+    border-width: 1px;
+}
+.line-block-wrapper .line-block-content {
+    position: relative;
+    top: -2em;
+    left: 2.6em;
+    margin-right: 2.6em;
+}
+.line-block-wrapper .line-block-content .content-item {
+    border: 1px solid #e4dfd6;
+    display: inline-block;
+    border-radius: 3px;
+    padding: 0 3px;
+    margin-top: 3px;
+    margin-bottom: -2em;
+}
+.line-block-wrapper .line-block-content .content-item + .content-item {
+   margin-left: 5px;
+}
+.line-tip {
+    width: 4em;
+    text-align: right;
+}
+.popup-tip-msg {
+    position: absolute;
+    right: 0.7em;
+    top: 0.5em;
+    color: #f00;
+}
+@media (max-width: 560px) {
+    .popup-tip-msg {
+        max-width: 10em;
+    }
+}
+@media (max-width: 444px) {
+    .box-form-wrapper {
+        padding-top: 2em;
+    }
+    .popup-tip-msg {
+        max-width: 100%;
+    }
+}
