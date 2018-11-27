@@ -4,7 +4,7 @@ function send_request(url, action, total, left, origin_text, $btn) {
         url: url,
         data: {
             action: action,
-            id: _id
+            uid: _id
         },
         dataType: 'json',
         type: 'POST',
