@@ -20,7 +20,7 @@
         <h2>微信订阅号运营平台</h2>
       </div>
       <div class="login-box">
-        <div class="login-form">
+        <form class="login-form">
           <h3 class="login-head"><i class="fa fa-lg fa-fw fa-user"></i>登 录</h3>
           <div class="form-group">
             <label class="control-label">账号</label>
@@ -43,7 +43,7 @@
           <div class="form-group btn-container">
             <button class="btn btn-primary btn-block"><i class="fa fa-sign-in fa-lg fa-fw"></i>登 录</button>
           </div>
-        </div>
+        </form>
         <div class="forget-form">
           <h3 class="login-head"><i class="fa fa-lg fa-fw fa-lock"></i>找回密码</h3>
           <div class="form-group">
@@ -77,6 +77,10 @@
         $('.login-box').toggleClass('flipped');
         return false;
       });
+      $('form.login-form').submit(function(event) {
+        event.preventDefault();
+        return false;
+      });
       $('.login-form .btn-container button.btn-primary').click(function() {
         var email = $('input[name="email"]').val().trim(),
           password = $('input[name="password"]').val().trim();
@@ -90,6 +94,7 @@
           dataType: 'json',
           success: function(resp) {
             if(resp.error == 0) {
+              $('form.login-form').trigger('submit');
               swal("温馨提示", resp.desc,"success", {timer: 1500}).then(function() {
                 window.location.href = resp.url;
               });

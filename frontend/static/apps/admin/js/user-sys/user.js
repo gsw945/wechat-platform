@@ -108,7 +108,7 @@ function popup_user(box_title, user_item) {
     if(!user_item) {
         is_new = true;
         user_item = {
-            name: '',
+            nickname: '',
             email: '',
             advertising: '',
             is_hot: 0,

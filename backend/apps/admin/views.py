@@ -39,3 +39,14 @@ def view_user_sys_role():
 @record_auth_route(app_name + '-用户管理-权限分配', check_func=login_required)
 def view_user_sys_permission():
     return render_template(app_name + '/pages/user-sys-permission.html')
+
+
+@admin_app.route('/plugin-sys/list')
+@record_auth_route(app_name + '-插件管理-插件列表', check_func=login_required)
+def view_plugin_list():
+    return render_template(app_name + '/pages/plugin-sys-list.html')
+
+@admin_app.route('/plugin-sys/my')
+@record_auth_route(app_name + '-插件管理-我的', check_func=login_required)
+def view_plugin_my():
+    return render_template(app_name + '/pages/plugin-sys-my.html')

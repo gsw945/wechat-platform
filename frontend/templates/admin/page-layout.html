@@ -113,6 +113,7 @@
     <script src="{{ url_for('static', filename='apps/admin/js/popper.min.js') }}"></script>
     <script src="{{ url_for('static', filename='apps/admin/js/bootstrap.min.js') }}"></script>
     <script src="{{ url_for('static', filename='_libs/bootbox/bootbox.min.js') }}"></script>
+    <script src="{{ static_url('draggabilly') }}"></script>
     <script src="{{ url_for('static', filename='apps/admin/js/main.js') }}"></script>
     <!-- The javascript plugin to display page loading on top-->
     <script src="{{ url_for('static', filename='apps/admin/js/plugins/pace.min.js') }}"></script>
@@ -127,8 +128,6 @@
       window.GLOBAL.DEBUG = "{{ config.DEBUG }}"; // app.config['DEBUG']
 
       window.GLOBAL.PAGE_ID = "{{ request.endpoint }}"; // 模板变量
-
-      var DRAGGABILLY_SRC = "{{ static_url('draggabilly') }}";
 
       function build_line(item_name, item_html, tip_style) {
         if(!tip_style) {
@@ -149,21 +148,19 @@
         // 配置调试工具
         var $fl_dth = $('#flDebugToolbarHandle');
         if($fl_dth.length > 0) {
-          loadJS(DRAGGABILLY_SRC, function() {
-            var pos = $fl_dth.position();
-            $fl_dth.draggabilly({
-              containment: 'body'
-            });
-            $fl_dth.css('position', 'fixed');
-            $fl_dth.css({
-              'left': pos.left + 'px',
-              'top': pos.top + 'px',
-              'display': 'inline-block',
-              'width': '37px'
-            });
-            $fl_dth.find('#flShowToolBarButton').css('display', 'inline-block');
-            $('#flDebugToolbar').css('overflow', 'auto');
+          var pos = $fl_dth.position();
+          $fl_dth.draggabilly({
+            containment: 'body'
           });
+          $fl_dth.css('position', 'fixed');
+          $fl_dth.css({
+            'left': pos.left + 'px',
+            'top': pos.top + 'px',
+            'display': 'inline-block',
+            'width': '37px'
+          });
+          $fl_dth.find('#flShowToolBarButton').css('display', 'inline-block');
+          $('#flDebugToolbar').css('overflow', 'auto');
         }
 
         var $sidebar = $('.app-sidebar .app-menu');
@@ -182,6 +179,26 @@
           $li_top.children('a.app-menu__item').addClass('active');
           $li_top.addClass('is-expanded');
         }
+
+        $('.app-nav').on('click', 'a[data-url]', function() {
+          $.ajax({
+            url: $(this).attr('data-url'),
+            type: 'POST',
+            data: {},
+            dataType: 'json',
+            success: function(resp) {
+              if(resp.error == 0) {
+                window.location.href = resp.url;
+              }
+              else {
+                  bootbox.alert('网络错误');
+              }
+            },
+            error: function(xhr) {
+              console.log(xhr);
+            }
+          });
+        });
       });
     </script>
     {% endblock %}

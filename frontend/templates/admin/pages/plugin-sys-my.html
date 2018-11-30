@@ -1,0 +1,141 @@
+{% extends "admin/page-layout.html" %}
+
+{% set title_icon = 'fa-cogs' %}
+{% set body_title = '我的插件' %}
+{% set body_describe = '暂时没有内容' %}
+
+{% block head_css %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='_libs/monaco-editor/min/vs/editor/editor.main.css') }}">
+  <style type="text/css">
+    .app-title {
+      margin-bottom: 10px;
+    }
+    #edibor-toolbar {
+      /*border: 1px solid #ccc;*/
+      padding: 3px 5px;
+      margin-bottom: 0;
+    }
+    #edibor-toolbar li {
+      display: inline-block;
+      list-style-type: none;
+    }
+    #edibor-toolbar li + li.item-left {
+      border-left: 1px solid #fff;
+      margin-left: 10px;
+      padding-left: 10px;
+    }
+    #edibor-toolbar .link-btn {
+      font-size: 1.15em;
+    }
+    #edibor-toolbar .item-right {
+      float: right;
+      margin-right: 2em;
+    }
+  </style>
+{% endblock %}
+
+
+{% block app_body %}
+<div class="row">
+  <div class="col-md-12">
+    <ul id="edibor-toolbar">
+      <li class="item-left">
+        <a class="link-btn" id="button-save" href="javascript:;">保存</a>
+      </li>
+      <li class="item-left">
+        <a class="link-btn" id="button-release" href="javascript:;">发布</a>
+        <span class="text-muted">(历史发布: <a href="javascript:;">
+          <strong id="release-history">3</strong>
+        </a> 次)</span>
+      </li>
+      <li class="item-right">
+        <span class="text-muted">最新发布: <strong id="release-latest">2018-11-30 12:34:56</strong></span>
+      </li>
+      <li class="item-right">
+        <span class="text-muted">当前状态: <strong id="release-status">未发布</strong></span>
+      </li>
+    </ul>
+    <span style="clear: both;"></span>
+  </div>
+  <div class="col-md-12">
+    <div id="container" style="width:100%; height:430px; border:1px solid grey;"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block body_js %}
+  {{ super() }}
+  <script type="text/javascript">
+    var require = {
+      paths: {
+        'vs': "{{ url_for('static', filename='_libs/monaco-editor/min/vs') }}"
+      }
+    };
+  </script>
+  <script src="{{ url_for('static', filename='_libs/monaco-editor/min/vs/loader.js') }}"></script>
+  <script src="{{ url_for('static', filename='_libs/monaco-editor/min/vs/editor/editor.main.nls.js') }}"></script>
+  <script src="{{ url_for('static', filename='_libs/monaco-editor/min/vs/editor/editor.main.nls.zh-cn.js') }}"></script>
+  <script src="{{ url_for('static', filename='_libs/monaco-editor/min/vs/editor/editor.main.js') }}"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      monaco.languages.setLanguageConfiguration('python', {
+        indentationRules: {
+          // ^(.*\*/)?\s*\}.*$
+          decreaseIndentPattern: /^((?!.*?\/\*).*\*\/)?\s*[\}\]\)].*$/,
+          // ^.*\{[^}"']*$
+          increaseIndentPattern: /^((?!\/\/).)*(\{[^}"'`]*|\([^)"'`]*|\[[^\]"'`]*)$/
+        }
+      });
+
+      var py_code = [
+        '# -*- coding: utf-8 -*-',
+        'import os',
+        '',
+        '',
+        'print(os.getcwd())'
+      ].join('\n');
+      var editor = monaco.editor.create(document.getElementById("container"), {
+        value: py_code,
+        language: "python",
+        glyphMargin: true,
+        contextmenu: false,
+        theme: 'vs-dark' // vs-light, vs-dark
+      });
+
+      editor.updateOptions({
+        "autoIndent": true,
+        "formatOnPaste": true,
+        "formatOnType": true
+      });
+      $('#button-save').on('click', function() {
+        var val = editor.getValue();
+        console.log(val);
+      });
+      /*
+      // 前2行只读
+      editor.onDidChangeCursorPosition(function(e) {
+        if (e.position.lineNumber < 3) {
+          editor.setPosition({
+            lineNumber:3,
+            column: 1
+          });
+        }
+      });
+      */
+      /*
+      // 添加块
+      var viewZoneId = null;
+      editor.changeViewZones(function(changeAccessor) {
+          var domNode = document.createElement('div');
+          domNode.style.background = '#ccc';
+          viewZoneId = changeAccessor.addZone({
+                afterLineNumber: 3,
+                heightInLines: 3,
+                domNode: domNode
+          });
+      });
+      */
+    });
+  </script>
+{% endblock %}

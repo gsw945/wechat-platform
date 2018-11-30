@@ -52,7 +52,7 @@ class User(Base):
         lazy='dynamic'
     )
 
-    def __init__(self, email, password, nickname=None):
+    def __init__(self, email=None, password=None, nickname=None):
         self.email = email
         self.password = password
         self.nickname = nickname
@@ -61,7 +61,8 @@ class User(Base):
         return {
             'uid': self.uid,
             'email': self.email,
-            'nickname': self.nickname
+            'nickname': self.nickname,
+            'disable': self.disable
         }
 
     def __repr__(self):

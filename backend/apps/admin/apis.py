@@ -3,10 +3,12 @@
 import json
 
 from flask import jsonify, request, session
+from sqlalchemy import func
 
 from . import admin_app
-from ..auth.models import User
+from ..auth.models import User, Role, Permission, user_role_map, role_permission_map
 from ..auth.apis import LOGINED_SESSION
+from .models import WechatPlugin
 from ...core.database import db
 
 
@@ -50,7 +52,8 @@ def user_delete_or_disable():
                         user_obj.disable = True
                         db.session.commit()
                     elif action == 'delete':
-                        user_obj.deleted = True
+                        # user_obj.deleted = True
+                        db.session.delete(user_obj)
                         db.session.commit()
                     ret = {
                         'error': 0,
@@ -154,7 +157,7 @@ def update_user_info(user_id, user_data):
 def add_new_user(user_data):
     user_obj = User()
     if 'nickname' in user_data:
-        user_obj.name = user_data['nickname']
+        user_obj.nickname = user_data['nickname']
     if 'email' in user_data:
         # TODO: email格式校验
         user_obj.email = user_data['email']
@@ -163,3 +166,67 @@ def add_new_user(user_data):
     db.session.add(user_obj)
     db.session.commit()
     return (True, None)
+
+
+@admin_app.route(r'/role/list', methods=['GET', 'POST'])
+def role_list_ajax():
+    '''角色列表'''
+    _offset = request.values.get('offset', None)
+    _limit = request.values.get('limit', None)
+    ur_count = func.count(user_role_map.columns.urid).label('user_count')
+    Q = db.session.query(
+        Role.rid, Role.name, ur_count
+    ).join(user_role_map).group_by(Role.rid, Role.name)
+
+    total = Q.count()
+    if not _offset is None and _offset.isdigit():
+        _offset = int(_offset)
+        Q = Q.offset(_offset)
+    if not _limit is None and _limit.isdigit():
+        _limit = int(_limit)
+        Q = Q.limit(_limit)
+    ret_data = []
+    for role_obj in Q.all():
+        ret_data.append(role_obj.to_dict())
+    ret = {
+        'rows': ret_data,
+        'total': total,
+        'error': 0,
+        'desc': 'ok'
+    }
+    return jsonify(ret)
+
+@admin_app.route(r'/plugin/list', methods=['GET', 'POST'])
+def plugin_list_ajax():
+    '''用户列表'''
+    _offset = request.values.get('offset', None)
+    _limit = request.values.get('limit', None)
+    Q = db.session.query(WechatPlugin).order_by(
+        WechatPlugin.plugin_name.desc()
+    ).with_entities(WechatPlugin.wpid).distinct()
+
+    total = Q.count()
+    if not _offset is None and _offset.isdigit():
+        _offset = int(_offset)
+        Q = Q.offset(_offset)
+    if not _limit is None and _limit.isdigit():
+        _limit = int(_limit)
+        Q = Q.limit(_limit)
+    ret_data = []
+    for plugin_obj in Q.all():
+        ret_data.append(plugin_obj.to_dict())
+    ret = {
+        'rows': ret_data,
+        'total': total,
+        'error': 0,
+        'desc': 'ok'
+    }
+    return jsonify(ret)
+
+@admin_app.route(r'/plugin/save', methods=['GET', 'POST'])
+def role_save_ajax():
+    return json.dumps({})
+
+@admin_app.route(r'/plugin/delete', methods=['GET', 'POST'])
+def role_delete_ajax():
+    return json.dumps({})

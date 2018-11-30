@@ -47,9 +47,28 @@ sidebar = [
             },
             {
                 'icon': 'fa fa-sitemap',
-                'text': '角色管理',
+                'text': '权限分配',
                 'type': 'url4',
                 'value': 'admin.view_user_sys_permission'
+            }
+        ]
+    },
+    {
+        'icon': 'fa fa-plug',
+        'text': '插件系统',
+        'type': 'group',
+        'value': [
+            {
+                'icon': 'fa fa-cogs',
+                'text': '我的插件',
+                'type': 'url4',
+                'value': 'admin.view_plugin_my'
+            },
+            {
+                'icon': 'fa fa-linode',
+                'text': '插件列表',
+                'type': 'url4',
+                'value': 'admin.view_plugin_list'
             }
         ]
     }
